@@ -1,0 +1,15 @@
+Are these neccesary? Maybe.
+
+1. move the AbletonJS folder into 
+      Windows: C:\Users\[your user]\Documents\Ableton\User Library\Remote Scripts
+      MacOS: idk. please, someone with macos do this
+2. move the LiveHUD folder wherever you want.
+3. open Ableton Live and go to Preferences > Link/MIDI and select AbletonJS as Control Surface
+4. open the LiveHUD folder with your terminal and run the following. Don't close the terminal after that.
+        npm init -y
+        npm install ableton-js express socket.io
+5. run the following command:
+        node index.js
+6. Open http://localhost:3000
+
+it should all work. xoxo!
