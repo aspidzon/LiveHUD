@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Joaco Live Display</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="next-track">SIGUIENTE: <span id="next-title">...</span></div>
+        <div class="order-box">#<span id="order">0</span></div>
+    </header>
+
+    <main>
+        <div id="panic-container">
+            <button onclick="sendCommand('panic')" id="btn-panic">Panic Silence</button>
+        </div>
+
+        <div id="title-container">
+            <h1 id="title">CONECTANDO</h1>
+        </div>
+        
+        <div class="meta-info">
+            <div class="time-wrapper">
+                <span id="time-elapsed" class="time">00:00</span>
+            </div>
+
+            <span id="feat" class="feat-artist"></span>
+
+            <div class="time-wrapper">
+                <span id="time-remaining" class="time">00:00</span>
+                <div id="musical-countdown">0 : 0 : 0</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="transport">
+            <button onclick="sendCommand('toggleMetronome')" id="btn-metro">
+                <i class="material-icons">timer</i>
+            </button>
+            <button onclick="sendCommand('prev')"><i class="material-icons">skip_previous</i></button>
+            <button onclick="sendCommand('stopOnly')"><i class="material-icons">stop</i></button>
+            <button onclick="sendCommand('playOnly')" id="btn-play"><i class="material-icons">play_arrow</i></button>
+            <button onclick="sendCommand('next')"><i class="material-icons">skip_next</i></button>
+        </div>
+        
+        <div class="center-controls">
+            <button onclick="toggleModal()" class="btn-list">LISTA DE TEMAS</button>
+        </div>
+
+        <div class="metronome">
+            <div id="beat-indicator"></div>
+            <span style="font-size: 10px; color: #444; font-weight: bold;">LINK</span>
+        </div>
+    </footer>
+
+    <div id="modal-list" class="modal" onclick="toggleModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="track-list-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const KEY_MAP = {
+            METRONOME: 'o',
+            PLAY_PAUSE: ' ', 
+            NEXT: 'PageDown',
+            PREV: 'PageUp',
+            TOGGLE_LIST: 'l',
+            PANIC: 'Escape' // Escape para pánico también
+        };
+
+        const socket = io();
+        
+        const elTitle = document.getElementById('title');
+        const elOrder = document.getElementById('order');
+        const elFeat = document.getElementById('feat');
+        const elNext = document.getElementById('next-title');
+        const elElapsed = document.getElementById('time-elapsed');
+        const elRemaining = document.getElementById('time-remaining');
+        const elMusical = document.getElementById('musical-countdown');
+        const elBeat = document.getElementById('beat-indicator');
+        const elPlayBtn = document.getElementById('btn-play');
+        const elMetroBtn = document.getElementById('btn-metro');
+        const listContainer = document.getElementById('track-list-container');
+        const container = document.getElementById('title-container');
+
+        let currentTitle = "";
+        let lastBeat = -1; 
+
+        socket.on("update", (data) => {
+            if (currentTitle !== data.title) {
+                currentTitle = data.title;
+                elTitle.innerText = data.title;
+                fitText(); 
+            }
+            
+            elOrder.innerText = data.order;
+            elFeat.innerText = data.feat ? `ft. ${data.feat}` : "";
+            elNext.innerText = data.nextTitle;
+            elElapsed.innerText = data.elapsed;
+            elRemaining.innerText = `-${data.remaining}`;
+            elMusical.innerText = data.remainingMusical;
+
+            // Estados de alerta
+            if (data.progress > 0.85) {
+                elRemaining.style.color = "#ff0044"; 
+                elRemaining.style.borderColor = "#ff0044";
+                elMusical.classList.add("musical-visible");
+            } else if (data.progress > 0.6) {
+                elRemaining.style.color = "#ffcc00"; 
+                elRemaining.style.borderColor = "#333";
+                elMusical.classList.remove("musical-visible");
+            } else {
+                elRemaining.style.color = "#00ff41"; 
+                elRemaining.style.borderColor = "#333";
+                elMusical.classList.remove("musical-visible");
+            }
+
+            // Metrónomo (Botón)
+            if (data.metronome) elMetroBtn.classList.add("metro-btn-active");
+            else elMetroBtn.classList.remove("metro-btn-active");
+
+            // Metrónomo (Visual Link)
+            if (data.isPlaying) {
+                elPlayBtn.style.color = "#00ff41";
+                if (data.beat !== lastBeat) {
+                    lastBeat = data.beat;
+                    // Forzar reflow para reiniciar animación
+                    elBeat.classList.remove("beat-flash-strong", "beat-flash-weak");
+                    void elBeat.offsetWidth; 
+
+                    if (data.beat === 1) elBeat.classList.add("beat-flash-strong");
+                    else elBeat.classList.add("beat-flash-weak");
+                }
+            } else {
+                elBeat.classList.remove("beat-flash-strong", "beat-flash-weak");
+                elBeat.style.background = "#222";
+                elPlayBtn.style.color = "#666";
+            }
+        });
+
+        socket.on("cueList", (list) => {
+            listContainer.innerHTML = "";
+            list.forEach(trackName => {
+                const btn = document.createElement("button");
+                btn.innerText = trackName;
+                btn.className = "track-btn";
+                btn.onclick = () => {
+                    sendCommand('jump', trackName);
+                    toggleModal();
+                };
+                listContainer.appendChild(btn);
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === KEY_MAP.PLAY_PAUSE) { e.preventDefault(); sendCommand('play'); return; }
+            if (e.key === KEY_MAP.NEXT) { e.preventDefault(); sendCommand('next'); return; }
+            if (e.key === KEY_MAP.PREV) { e.preventDefault(); sendCommand('prev'); return; }
+            if (e.key === KEY_MAP.PANIC) { e.preventDefault(); sendCommand('panic'); return; }
+            if (e.key.toLowerCase() === KEY_MAP.METRONOME) { sendCommand('toggleMetronome'); return; }
+            if (e.key.toLowerCase() === KEY_MAP.TOGGLE_LIST) { toggleModal(); return; }
+
+            const key = e.key.toLowerCase();
+            
+            // Números 1-9
+            if (key >= '1' && key <= '9') {
+                sendCommand('jumpIndex', { index: parseInt(key) - 1 });
+                return;
+            }
+            if (key === '0') {
+                sendCommand('jumpIndex', { index: 9 });
+                return;
+            }
+
+            const alphabet = "abcdefghijklmnopqrstuvwxyz";
+            if (alphabet.includes(key)) {
+                if (key === KEY_MAP.METRONOME || key === KEY_MAP.TOGGLE_LIST) return;
+                const letterIndex = alphabet.indexOf(key);
+                const trackIndex = 10 + letterIndex;
+                sendCommand('jumpIndex', { index: trackIndex });
+            }
+        });
+
+        function sendCommand(type, data = null) {
+            if (data && typeof data === 'object') {
+                socket.emit("command", { type, ...data });
+            } else {
+                socket.emit("command", { type, target: data });
+            }
+        }
+
+        function fitText() {
+            let fontSize = 20;
+            elTitle.style.fontSize = fontSize + "vw";
+            while ( (elTitle.scrollWidth > container.clientWidth || elTitle.scrollHeight > container.clientHeight) && fontSize > 2 ) {
+                fontSize -= 0.5;
+                elTitle.style.fontSize = fontSize + "vw";
+            }
+        }
+        window.addEventListener('resize', fitText);
+        
+        function toggleModal() {
+            const m = document.getElementById('modal-list');
+            m.style.display = (m.style.display === "block") ? "none" : "block";
+        }
+    </script>
+<div class="credits">
+    Powered by <a href="https://github.com/leolabs/ableton-js" target="_blank">ableton-js</a>
+</div>
+</body>
+</html>
