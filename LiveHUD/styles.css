@@ -1,0 +1,302 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+@font-face {
+    font-family: 'Fixture';
+    src: local('Fixture'), local('Fixture-Regular'), local('Fixture-Bold'), local('Arial');
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Fixture', 'Impact', sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* HEADER */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    height: 10vh;
+    box-sizing: border-box;
+}
+
+.next-track {
+    color: #555;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+#next-title { color: #888; margin-left: 15px; }
+
+.order-box {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #333;
+    border: 2px solid #333;
+    padding: 0px 20px;
+    border-radius: 12px;
+}
+
+/* MAIN */
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+/* PANIC BUTTON */
+#panic-container {
+    margin-bottom: 20px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+#panic-container:hover { opacity: 1; }
+
+#btn-panic {
+    background-color: #300; /* Rojo oscuro base */
+    color: #f00;
+    border: 2px solid #f00;
+    font-family: 'Fixture', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+    transition: all 0.1s;
+}
+
+#btn-panic:active {
+    background-color: #f00;
+    color: #000;
+    box-shadow: 0 0 30px #f00;
+    transform: scale(0.95);
+}
+
+/* TITULO */
+#title-container { 
+    width: 90%; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35vh;
+}
+
+#title {
+    margin: 0;
+    line-height: 1;
+    text-transform: uppercase;
+    font-weight: 900;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.meta-info {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.feat-artist {
+    font-size: 2.5rem;
+    color: #00E5FF;
+    font-style: italic;
+    font-weight: 600;
+}
+
+.time-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.time {
+    font-family: 'Fixture', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 2.5rem;
+    background: #111;
+    padding: 10px 20px;
+    border-radius: 8px;
+    min-width: 140px;
+    text-align: center;
+    border: 1px solid #222;
+}
+
+#musical-countdown {
+    font-family: 'Fixture', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.8rem;
+    color: #ff0044;
+    margin-top: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-weight: bold;
+}
+
+.musical-visible {
+    opacity: 1 !important;
+    animation: pulse-red 0.5s infinite alternate;
+}
+
+@keyframes pulse-red {
+    from { text-shadow: 0 0 5px #ff0044; }
+    to { text-shadow: 0 0 15px #ff0044; }
+}
+
+/* FOOTER */
+footer {
+    height: 18vh;
+    background: #0a0a0a;
+    border-top: 1px solid #222;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    padding: 0 40px;
+}
+
+.transport {
+    display: flex;
+    gap: 15px;
+    justify-self: start;
+}
+
+.transport button {
+    background: #1a1a1a;
+    border: none;
+    color: #666;
+    padding: 15px;
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.transport button:active { background: #333; transform: scale(0.95); }
+.material-icons { font-size: 48px !important; }
+
+.metro-btn-active {
+    color: #111 !important;
+    background-color: #ffcc00 !important;
+    box-shadow: 0 0 15px #ffcc00;
+}
+
+.center-controls {
+    justify-self: center;
+}
+
+.btn-list {
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    font-family: 'Fixture', sans-serif;
+    font-weight: bold;
+    background: #222;
+    color: #fff;
+    border: 2px solid #333;
+    border-radius: 50px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: background 0.2s;
+}
+.btn-list:hover { background: #333; border-color: #555; }
+
+/* METRONOMO VISUAL */
+.metronome {
+    justify-self: end;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+}
+
+#beat-indicator {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    background: #222;
+}
+
+/* Animaciones del beat */
+.beat-flash-strong { animation: flash-red 0.15s ease-out forwards; }
+.beat-flash-weak { animation: flash-white 0.15s ease-out forwards; }
+
+@keyframes flash-red {
+    0% { background: #ff0044; transform: scale(1.4); box-shadow: 0 0 25px #ff0044; }
+    100% { background: #222; transform: scale(1); box-shadow: none; }
+}
+@keyframes flash-white {
+    0% { background: #fff; transform: scale(1.2); box-shadow: 0 0 15px #fff; }
+    100% { background: #222; transform: scale(1); box-shadow: none; }
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.95);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    margin: 5vh auto;
+    width: 70%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.track-btn {
+    display: block;
+    width: 100%;
+    padding: 25px;
+    margin: 2px 0;
+    background: transparent;
+    color: #666;
+    border: none;
+    border-bottom: 1px solid #222;
+    font-size: 2rem;
+    font-family: 'Fixture', sans-serif;
+    text-align: left;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+.track-btn:hover { color: #fff; padding-left: 40px; background: #111; }
+.credits {
+    position: fixed;
+    bottom: 5px;
+    right: 10px;
+    font-size: 0.6rem;
+    color: #333;
+    font-family: sans-serif;
+    z-index: 10;
+    pointer-events: none; /* Para que no moleste a los clicks */
+}
+.credits a {
+    color: #444;
+    text-decoration: none;
+    pointer-events: auto;
+}
